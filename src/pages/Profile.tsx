@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router";
 import { useAuth } from "@/context";
+import { createMember } from "@/utils/api";
 
 const ProfileFormSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -26,7 +27,6 @@ const ProfileFormSchema = z.object({
 });
 
 export type ProfileFormValues = z.infer<typeof ProfileFormSchema>;
-const baseUrl = "https://member-management-backend.vercel.app";
 
 const ProfileForm = () => {
   const { userId, token } = useAuth();
@@ -59,27 +59,14 @@ const ProfileForm = () => {
 
   const profileSubmit = async (values: ProfileFormValues) => {
     setLoading(true);
+
+    const data = {
+      values: { ...values, userId: userId },
+      token: token,
+    };
     try {
-      const response = await fetch(`${baseUrl}/members`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          ...values,
-          userId,
-        }),
-      });
+      await createMember(data);
 
-      console.log(response);
-
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-
-      const data = await response.json();
-      console.log(data);
       navigate("/dashboard");
     } catch (error) {
       console.log(error);

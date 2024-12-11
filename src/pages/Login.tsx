@@ -11,9 +11,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useNavigate } from "react-router";
+import { Navigate } from "react-router";
 import { useState } from "react";
 import { loginUser } from "@/utils/api";
+import { useAuth } from "@/context";
+import toast from "react-hot-toast";
 
 const signInFormSchema = z.object({
   email: z.string().email("Invalid email address").min(6, "Email is required"),
@@ -23,9 +25,9 @@ const signInFormSchema = z.object({
 export type signInFormValues = z.infer<typeof signInFormSchema>;
 
 const SignInForm = () => {
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const { authenticateUser, isAuthenticated } = useAuth();
 
   const signInForm = useForm<signInFormValues>({
     resolver: zodResolver(signInFormSchema),
@@ -40,15 +42,21 @@ const SignInForm = () => {
     setErrorMessage("");
 
     try {
-      await loginUser(values);
-      navigate("/dashboard");
+      const response = await loginUser(values);
+      toast.success("Login successful");
+      authenticateUser(response.token, response.userId);
     } catch (error) {
+      toast.error("Invalid login credentials");
       setErrorMessage("Invalid login credentials");
       console.log(error);
     } finally {
       setLoading(false);
     }
   };
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" />;
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">

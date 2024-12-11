@@ -5,7 +5,7 @@ import { useAuth } from "@/context";
 
 export default function Navbar() {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, logoutUser } = useAuth();
   return (
     <nav
       className="flex items-center justify-between px-6 py-4"
@@ -42,7 +42,7 @@ export default function Navbar() {
           <Button
             variant="default"
             className="bg-[rgb(241,240,232)] text-[#89A8B2] hover:bg-[#B3C8CF] hover:text-[rgb(241,240,232)]"
-            onClick={() => navigate("/dashboard")}
+            onClick={() => logoutUser()}
           >
             Logout
           </Button>

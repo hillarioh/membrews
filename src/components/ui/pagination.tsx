@@ -1,8 +1,6 @@
 import { Button } from "./button";
 
-import { Table } from "some-table-library"; // Adjust the import according to your table library
-
-const Pagination = ({ table }: { table: Table }) => {
+const Pagination = ({ table }: { table: any }) => {
   const totalPages = table.getPageCount(); // Total number of pages
   const currentPage = table.getState().pagination.pageIndex + 1; // Current page (1-based index)
   const pageSizeOptions = [5, 10, 15]; // Page size options

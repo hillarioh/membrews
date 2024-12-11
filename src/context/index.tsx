@@ -4,8 +4,7 @@ interface AuthContextType {
   userId: string | null;
   token: string | null;
   isAuthenticated: boolean;
-  registerUser: (userId: string, token: string) => void;
-  loginUser: (userId: string, token: string) => void;
+  authenticateUser: (userId: string, token: string) => void;
   logoutUser: () => void;
 }
 
@@ -27,15 +26,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
-  const registerUser = (userId: string, token: string) => {
-    setUserId(userId);
-    setToken(token);
-    setIsAuthenticated(true);
-    localStorage.setItem("token", token);
-    localStorage.setItem("userId", userId);
-  };
-
-  const loginUser = (userId: string, token: string) => {
+  const authenticateUser = (userId: string, token: string) => {
     setUserId(userId);
     setToken(token);
     setIsAuthenticated(true);
@@ -57,8 +48,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         userId,
         token,
         isAuthenticated,
-        registerUser,
-        loginUser,
+        authenticateUser,
         logoutUser,
       }}
     >

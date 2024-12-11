@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -12,19 +12,51 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router";
-import { registerUser } from "@/utils/api";
+import { Link, Navigate } from "react-router";
+import { getRoles, registerUser } from "@/utils/api";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import toast from "react-hot-toast";
+import { useAuth } from "@/context";
 
 const signUpFormSchema = z.object({
   username: z.string().min(6, "Username must be at least 6 characters long"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters long"),
+  roleId: z.string().uuid("Invalid role id"),
 });
 
 export type signUpFormValues = z.infer<typeof signUpFormSchema>;
 
+type Role = {
+  id: string;
+  roleName: string;
+};
+
 const SignUpForm = () => {
   const [loading, setLoading] = useState(true);
+  const [roles, setRoles] = useState<Role[]>([]);
+
+  const { authenticateUser, isAuthenticated } = useAuth();
+
+  const fetchRoles = async () => {
+    try {
+      const response = await getRoles();
+      setRoles(response);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchRoles();
+  }, []);
 
   const signUpForm = useForm<signUpFormValues>({
     resolver: zodResolver(signUpFormSchema),
@@ -32,20 +64,27 @@ const SignUpForm = () => {
       username: "",
       email: "",
       password: "",
+      roleId: "",
     },
   });
 
   const signUpSubmit = async (values: signUpFormValues) => {
     try {
       const response = await registerUser(values);
-      console.log(response);
+      toast.success("Account created successfully.");
+      authenticateUser(response.token, response.user.id);
     } catch (error) {
+      toast.error("An error occurred. Please try again.");
       console.log(error);
     } finally {
       setLoading(false);
       console.log(loading);
     }
   };
+
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" />;
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-tl from-gray-100 to-gray-300">
@@ -54,7 +93,10 @@ const SignUpForm = () => {
           Create an Account
         </h2>
         <Form {...signUpForm}>
-          <form onSubmit={signUpForm.handleSubmit(signUpSubmit)}>
+          <form
+            onSubmit={signUpForm.handleSubmit(signUpSubmit)}
+            className="flex flex-col gap-3"
+          >
             {/* Username */}
             <FormField
               control={signUpForm.control}
@@ -113,6 +155,46 @@ const SignUpForm = () => {
                       placeholder="password"
                       {...field}
                     />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Select option Role */}
+            <FormField
+              control={signUpForm.control}
+              name="roleId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium text-gray-600">
+                    Role
+                  </FormLabel>
+                  <FormControl>
+                    <Select {...field} onValueChange={(e) => field.onChange(e)}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a Role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {roles.map((role) => (
+                            <SelectItem value={role.id}>
+                              {role.roleName}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    {/* <select
+                      {...field}
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                    >
+                      {roles.map((role) => (
+                        <option key={role.id} value={role.id}>
+                          {role.roleName}
+                        </option>
+                      ))}
+                    </select> */}
                   </FormControl>
                   <FormMessage />
                 </FormItem>
