@@ -5,7 +5,6 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-import ProfileForm from "./pages/Profile";
 import Navbar from "./layout/navbar";
 import ProtectedRoutes from "./routes/ProtectedRoutes";
 
@@ -32,14 +31,6 @@ const App = () => {
                 element={
                   <ProtectedRoutes>
                     <Dashboard />
-                  </ProtectedRoutes>
-                }
-              />
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoutes>
-                    <ProfileForm />
                   </ProtectedRoutes>
                 }
               />

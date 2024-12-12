@@ -3,8 +3,15 @@ import axios from "axios";
 // const baseUrl = "https://member-management-backend.vercel.app/users";
 const baseUrl = "http://127.0.0.1:3000";
 
-export const getUsers = async () => {
-  return axios.get(baseUrl).then((res) => res.data);
+export const getUsers = async (token: string) => {
+  return axios
+    .get(`${baseUrl}/users`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    .then((res) => res.data);
 };
 
 export const loginUser = async (values: {

@@ -30,6 +30,9 @@ const signUpFormSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters long"),
   roleId: z.string().uuid("Invalid role id"),
+  phone: z.string().min(10, "Phone number must be at least 10 characters"),
+  dateOfBirth: z.string().min(1, "Date of birth is required"),
+  profilePicture: z.string().optional(),
 });
 
 export type signUpFormValues = z.infer<typeof signUpFormSchema>;
@@ -65,6 +68,9 @@ const SignUpForm = () => {
       email: "",
       password: "",
       roleId: "",
+      phone: "",
+      dateOfBirth: "",
+      profilePicture: "",
     },
   });
 
@@ -72,13 +78,26 @@ const SignUpForm = () => {
     try {
       const response = await registerUser(values);
       toast.success("Account created successfully.");
-      authenticateUser(response.token, response.user.id);
+      authenticateUser(response.user.id, response.token);
     } catch (error) {
       toast.error("An error occurred. Please try again.");
       console.log(error);
     } finally {
       setLoading(false);
       console.log(loading);
+    }
+  };
+
+  const handleProfilePictureChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        signUpForm.setValue("profilePicture", reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -138,6 +157,44 @@ const SignUpForm = () => {
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={signUpForm.control}
+              name="dateOfBirth"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Date of Birth</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={signUpForm.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Phone</FormLabel>
+                  <FormControl>
+                    <Input placeholder="1234567890" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormItem>
+              <FormLabel>Profile Picture</FormLabel>
+              <FormControl>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleProfilePictureChange}
+                />
+              </FormControl>
+            </FormItem>
 
             {/* Password */}
             <FormField

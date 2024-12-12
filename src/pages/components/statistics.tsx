@@ -12,8 +12,8 @@ interface StatisticCardProps {
 }
 
 export function StatisticCard({ data }: StatisticCardProps) {
-  const adminCount = data.filter((d) => d.role === "admin").length;
-  const memberCount = data.filter((d) => d.role === "member").length;
+  const adminCount = data.filter((d) => d.role === "Admin").length;
+  const memberCount = data.filter((d) => d.role === "Member").length;
   const totalCount = data.length;
 
   return (
